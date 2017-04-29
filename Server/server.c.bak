@@ -86,35 +86,32 @@ void *connectionHandler(void *socket_desc){
   char *loc;
   FILE *fileLoc;
   char *address;
+  char *requestHeader;
   char *header;
   char *generic_header = "HTTP/1.0 200 OK\nContent-Type: text/html\nAccess-Control-Allow-Credentials: true";
   char *contentLength;
   int intContentLength;
-  char *requestHeader;
         
   //Receive a message from client
   while( (read_size = recv(sock , client_message , 2000 , 0)) > 0){
-    //puts(client_message);
+    puts(client_message);
     //for (i=client_message;i<client_message+strlen(client_message);i++){
       //printf("%c",*i);
     //}
-
-    int requestLength=0;
+    
     for (i=client_message;(i<client_message+strlen(client_message))&& *i != ' ';i++){
       requestLength++;
     }
-    //printf("Request Length: %d\n",requestLength);
-    //printf("Client message: %s\n",client_message);
+
     free(requestHeader);
-    char *requestHeader = malloc(requestLength+1);
+    char *requestHeader = malloc(requestLength);
     
     for (j=0; j<requestLength;j++){
       i=client_message+j;
       loc=requestHeader+j;
       *loc=*i;
     }
-    *(loc+1)='\0';
-    //printf("Length of requestHeader: %d\n",(int)strlen(requestHeader));
+    
     //printf("%s\n",requestHeader);
 
     if (strcmp(requestHeader, "GET")==0){
@@ -124,22 +121,19 @@ void *connectionHandler(void *socket_desc){
       }
 
       free(address);
-      //printf("%d",addressLength);
-      char *address = malloc(addressLength+1);
+      printf("%d",addressLength);
+      char *address = malloc(addressLength);
 
       for (j=0;j<=addressLength;j++){
 	i=client_message+requestLength+1+j;
 	loc=address+j;
 	*loc=*i;
       }
-      *(loc+1)='\0';
 
-      
-      //printf("The address: %s...\n",address);
+      printf("The address: %s...\n",address);
       
       if (strcmp(address,"/")==0){
-	char *generic_header = "HTTP/1.0 200 OK\nContent-Type: text/html\nAccess-Control-Allow-Credentials: true";
-	//printf("Okay, the address was /\n");
+	printf("Okay, the address was /\n");
 	FILE *file = fopen("Javascript Client/index.html","r");
 	fileLoc=file;
 	while (1){
@@ -167,27 +161,15 @@ void *connectionHandler(void *socket_desc){
 	intContentLength=strlen(fileContents);
         itoa(intContentLength,contentLength);
 	char *message = malloc(strlen(generic_header)+fileLength+strlen(contentLength)+strlen("Content-Length: \n\n\n")+1);
-	*message = (char)'\0';
-	//printf("message length: %d\n. message: %s\n",(int)strlen(message),message);
-	//printf("Generic Header: %s\n",generic_header);
-	//puts("Well, the printf finished...");
 	strcat(message,generic_header);
-	//puts("generic_header added to message");
 	strcat(message,"\nContent-Length: ");
 	strcat(message,contentLength);
 	strcat(message,"\n\n");
-	//puts("Content Length added to message");
 	strcat(message,fileContents);
-	//puts("File contents added to message");
-	strcat(message,"\0");
-	//puts("\0 added to message");
-	//printf("Message: %s",message);
-	write(sock , message , strlen(message)-1);
+	write(sock , message+1 , strlen(message)-2);
 	fclose(file);
-	close(sock);
       } else if (strcmp(address,"/index.html")==0){
-	char *generic_header = "HTTP/1.0 200 OK\nContent-Type: text/html\nAccess-Control-Allow-Credentials: true";
-	//printf("Okay, the address was /index.html\n");
+	printf("Okay, the address was /index.html\n");
 	FILE *file = fopen("Javascript Client/index.html","r");
 	fileLoc=file;
 	while (1){
@@ -215,27 +197,15 @@ void *connectionHandler(void *socket_desc){
 	intContentLength=strlen(fileContents);
         itoa(intContentLength,contentLength);
 	char *message = malloc(strlen(generic_header)+fileLength+strlen(contentLength)+strlen("Content-Length: \n\n\n")+1);
-	*message = (char)'\0';
-	//printf("message length: %d\n. message: %s\n",(int)strlen(message),message);
-	//printf("Generic Header: %s\n",generic_header);
-	//puts("Well, the printf finished...");
 	strcat(message,generic_header);
-	//puts("generic_header added to message");
 	strcat(message,"\nContent-Length: ");
 	strcat(message,contentLength);
 	strcat(message,"\n\n");
-	//puts("Content Length added to message");
 	strcat(message,fileContents);
-	//puts("File contents added to message");
-	strcat(message,"\0");
-	//puts("\0 added to message");
-	//printf("Message: %s",message);
-	write(sock , message , strlen(message)-1);
+	write(sock , message+1 , strlen(message)-2);
 	fclose(file);
-	close(sock);
       } else if (strcmp(address,"/index.js")==0){
-	char *generic_header = "HTTP/1.0 200 OK\nContent-Type: text/javascript\nAccess-Control-Allow-Credentials: true";
-	//printf("Okay, the address was /index.js\n");
+	printf("Okay, the address was /index.js\n");
 	FILE *file = fopen("Javascript Client/index.js","r");
 	fileLoc=file;
 	while (1){
@@ -252,7 +222,6 @@ void *connectionHandler(void *socket_desc){
 	  loc=fileContents+j;
 	  *loc = fgetc(file);
 	}
-	*(fileContents+j)=(char)'\0';
 	free(message);
 	free(contentLength);
 	intContentLength=strlen(fileContents);
@@ -264,27 +233,15 @@ void *connectionHandler(void *socket_desc){
 	intContentLength=strlen(fileContents);
         itoa(intContentLength,contentLength);
 	char *message = malloc(strlen(generic_header)+fileLength+strlen(contentLength)+strlen("Content-Length: \n\n\n")+1);
-	*message = (char)'\0';
-	//printf("message length: %d\n. message: %s\n",(int)strlen(message),message);
-	//printf("Generic Header: %s\n",generic_header);
-	//puts("Well, the printf finished...");
 	strcat(message,generic_header);
-	//puts("generic_header added to message");
 	strcat(message,"\nContent-Length: ");
 	strcat(message,contentLength);
 	strcat(message,"\n\n");
-	//puts("Content Length added to message");
 	strcat(message,fileContents);
-	//puts("File contents added to message");
-	strcat(message,"\0");
-	//puts("\0 added to message");
-	//printf("Message: %s",message);
-	write(sock , message , strlen(message)-1);
+	write(sock , message+1 , strlen(message)-2);
 	fclose(file);
-	close(sock);
       } else if (strcmp(address,"/index.css")==0){
-	char *generic_header = "HTTP/1.0 200 OK\nContent-Type: text/css\nAccess-Control-Allow-Credentials: true";
-	//printf("Okay, the address was /index.css\n");
+	printf("Okay, the address was /index.css\n");
 	FILE *file = fopen("Javascript Client/index.css","r");
 	fileLoc=file;
 	while (1){
@@ -296,13 +253,12 @@ void *connectionHandler(void *socket_desc){
 	}
 	fseek(file,0l,0);
 	char *fileContents = malloc(fileLength);
-	*fileContents = (char)'\0';
+	
 	for (j=0;j<=fileLength;j++){
 	  loc=fileContents+j;
 	  *loc = fgetc(file);
 	}
-	*(fileContents+j)=(char)'\0';
-	//printf("\n\nFile Contents:\n%s\n\n",fileContents);
+
 	free(message);
 	free(contentLength);
 	intContentLength=strlen(fileContents);
@@ -314,30 +270,17 @@ void *connectionHandler(void *socket_desc){
 	intContentLength=strlen(fileContents);
         itoa(intContentLength,contentLength);
 	char *message = malloc(strlen(generic_header)+fileLength+strlen(contentLength)+strlen("Content-Length: \n\n\n")+1);
-	*message = (char)'\0';
-	//printf("message length: %d\n. message: %s\n",(int)strlen(message),message);
-	//printf("Generic Header: %s\n",generic_header);
-	//puts("Well, the printf finished...");
 	strcat(message,generic_header);
-	//puts("generic_header added to message");
 	strcat(message,"\nContent-Length: ");
 	strcat(message,contentLength);
 	strcat(message,"\n\n");
-	//puts("Content Length added to message");
 	strcat(message,fileContents);
-	//puts("File contents added to message");
-	//printf("Message: %s",message);
-	strcat(message,"\0");
-	//puts("0 added to message");
-	//printf("Message: %s",message);
-	write(sock , message , strlen(message)-1);
+	write(sock , message+1 , strlen(message)-2);
 	fclose(file);
-	close(sock);
       } else {
-	//printf("It was not /");
+	printf("It was not /");
 	message = "HTTP/1.0 404 Not Found\nContent-Type: text/html\nConnection:close\nAccess-Control-Allow-Credentials: true\n\n<html><body><h1>404: Not Found</h1></body></html>";
 	write(sock , message , strlen(message)+1);
-	close(sock);
       }
     } else {
       message = "Okay, it looks like this isn't a get request. Hello, kind client! I don't understand!";
@@ -346,11 +289,11 @@ void *connectionHandler(void *socket_desc){
   }
 	
   if(read_size == 0){
-    //puts("Client disconnected");
+    puts("Client disconnected");
     fflush(stdout);
   }
   else if(read_size == -1){
-    //perror("recv failed");
+    perror("recv failed");
   }
 
   //Free the socket pointer
