@@ -1,0 +1,18 @@
+<xml>
+  <description>
+  </description>
+  <posts>
+    <post>
+      <type>subreddit</type>
+      <name>Test Sub</name>
+      <description>Simple Text sub. Does it work???</description>
+      <upvotes>5</upvotes>
+      <post>
+	<type>text</type>
+	<name>Simple Test text post</name>
+	<description>Hello, this is a text post. Please ignore</description>
+	<upvotes>3</upvotes>
+      </post>
+    </post>
+  </posts>
+</xml>

@@ -91,6 +91,7 @@ void *connectionHandler(void *socket_desc){
   char *contentLength;
   int intContentLength;
   char *requestHeader;
+  char *fileContents;
         
   //Receive a message from client
   while( (read_size = recv(sock , client_message , 2000 , 0)) > 0){
@@ -133,7 +134,7 @@ void *connectionHandler(void *socket_desc){
 	*loc=*i;
       }
       *(loc+1)='\0';
-
+      
       
       //printf("The address: %s...\n",address);
       
@@ -150,6 +151,7 @@ void *connectionHandler(void *socket_desc){
 	  fileLength++;
 	}
 	fseek(file,0l,0);
+	free(fileContents);
 	char *fileContents = malloc(fileLength);
 	
 	for (j=0;j<=fileLength;j++){
@@ -163,9 +165,11 @@ void *connectionHandler(void *socket_desc){
 	do {
 	  j++;
 	} while ((intContentLength/=10)>0);
+	free(contentLength);
 	char *contentLength = malloc(j);
 	intContentLength=strlen(fileContents);
         itoa(intContentLength,contentLength);
+	free(message);
 	char *message = malloc(strlen(generic_header)+fileLength+strlen(contentLength)+strlen("Content-Length: \n\n\n")+1);
 	*message = (char)'\0';
 	//printf("message length: %d\n. message: %s\n",(int)strlen(message),message);
@@ -198,6 +202,7 @@ void *connectionHandler(void *socket_desc){
 	  fileLength++;
 	}
 	fseek(file,0l,0);
+	free(fileContents);
 	char *fileContents = malloc(fileLength);
 	
 	for (j=0;j<=fileLength;j++){
@@ -211,9 +216,11 @@ void *connectionHandler(void *socket_desc){
 	do {
 	  j++;
 	} while ((intContentLength/=10)>0);
+        free(contentLength);
 	char *contentLength = malloc(j);
 	intContentLength=strlen(fileContents);
         itoa(intContentLength,contentLength);
+	free(message);
 	char *message = malloc(strlen(generic_header)+fileLength+strlen(contentLength)+strlen("Content-Length: \n\n\n")+1);
 	*message = (char)'\0';
 	//printf("message length: %d\n. message: %s\n",(int)strlen(message),message);
@@ -246,6 +253,7 @@ void *connectionHandler(void *socket_desc){
 	  fileLength++;
 	}
 	fseek(file,0l,0);
+	free(fileContents);
 	char *fileContents = malloc(fileLength);
 	
 	for (j=0;j<=fileLength;j++){
@@ -260,9 +268,11 @@ void *connectionHandler(void *socket_desc){
 	do {
 	  j++;
 	} while ((intContentLength/=10)>0);
+	free(contentLength);
 	char *contentLength = malloc(j);
 	intContentLength=strlen(fileContents);
         itoa(intContentLength,contentLength);
+	free(message);
 	char *message = malloc(strlen(generic_header)+fileLength+strlen(contentLength)+strlen("Content-Length: \n\n\n")+1);
 	*message = (char)'\0';
 	//printf("message length: %d\n. message: %s\n",(int)strlen(message),message);
@@ -295,6 +305,7 @@ void *connectionHandler(void *socket_desc){
 	  fileLength++;
 	}
 	fseek(file,0l,0);
+	free(fileContents);
 	char *fileContents = malloc(fileLength);
 	*fileContents = (char)'\0';
 	for (j=0;j<=fileLength;j++){
@@ -310,9 +321,11 @@ void *connectionHandler(void *socket_desc){
 	do {
 	  j++;
 	} while ((intContentLength/=10)>0);
+	free(contentLength);
 	char *contentLength = malloc(j);
 	intContentLength=strlen(fileContents);
         itoa(intContentLength,contentLength);
+	free(message);
 	char *message = malloc(strlen(generic_header)+fileLength+strlen(contentLength)+strlen("Content-Length: \n\n\n")+1);
 	*message = (char)'\0';
 	//printf("message length: %d\n. message: %s\n",(int)strlen(message),message);
@@ -329,6 +342,57 @@ void *connectionHandler(void *socket_desc){
 	//printf("Message: %s",message);
 	strcat(message,"\0");
 	//puts("0 added to message");
+	//printf("Message: %s",message);
+	write(sock , message , strlen(message)-1);
+	fclose(file);
+	close(sock);
+      } else if (strcmp(address,"/index.xml")==0){
+	char *generic_header = "HTTP/1.0 200 OK\nContent-Type: text/xml\nAccess-Control-Allow-Credentials: true";
+	//printf("Okay, the address was /index.xml\n");
+	FILE *file = fopen("kopokuneko/index.xml","r");
+	fileLoc=file;
+	while (1){
+	  fgetc(file);
+	  if (feof(file)){
+	    break;
+	  }
+	  fileLength++;
+	}
+	fseek(file,0l,0);
+	free(fileContents);
+	char *fileContents = malloc(fileLength);
+	
+	for (j=0;j<=fileLength;j++){
+	  loc=fileContents+j;
+	  *loc = fgetc(file);
+	}
+	free(message);
+	free(contentLength);
+	intContentLength=strlen(fileContents);
+	j=0;
+	do {
+	  j++;
+	} while ((intContentLength/=10)>0);
+	free(contentLength);
+	char *contentLength = malloc(j);
+	intContentLength=strlen(fileContents);
+        itoa(intContentLength,contentLength);
+	free(message);
+	char *message = malloc(strlen(generic_header)+fileLength+strlen(contentLength)+strlen("Content-Length: \n\n\n")+1);
+	*message = (char)'\0';
+	//printf("message length: %d\n. message: %s\n",(int)strlen(message),message);
+	//printf("Generic Header: %s\n",generic_header);
+	//puts("Well, the printf finished...");
+	strcat(message,generic_header);
+	//puts("generic_header added to message");
+	strcat(message,"\nContent-Length: ");
+	strcat(message,contentLength);
+	strcat(message,"\n\n");
+	//puts("Content Length added to message");
+	strcat(message,fileContents);
+	//puts("File contents added to message");
+	strcat(message,"\0");
+	//puts("\0 added to message");
 	//printf("Message: %s",message);
 	write(sock , message , strlen(message)-1);
 	fclose(file);
