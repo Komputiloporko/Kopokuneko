@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data type="kopokunekujo">
+  <description>
+    Simple Test Sub
+  </description>
+  <name>TestSub</name>
+  <type>subreddit</type>
+  <posts>
+    <post>
+      <identifier>Javascript%20Client</identifier>
+      <file>Javascript Client/index.xml</file>
+    </post>
+  </posts>
+</data>

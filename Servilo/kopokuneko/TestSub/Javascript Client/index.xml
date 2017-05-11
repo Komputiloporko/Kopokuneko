@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data type="subreddit">
+  <name>Javascript Client</name>
+  <description>Javascript Client</description>
+  <type>Meta</type>
+  <file name="index.html" loc="index.html" type="text/html">
+    <type>text/html</type>
+    <location>index.html</location>
+  </file>
+  <file name="index.js" loc="index.js" type="text/javascript">
+    <type>text/javascript</type>
+    <location>index.js</location>
+  </file>
+  <file name="index.css" loc="index.css" type="text/css">
+    <type>text/css</type>
+    <location>index.css</location>
+  </file>
+</data>
