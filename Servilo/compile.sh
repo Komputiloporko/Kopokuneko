@@ -1,1 +1,1 @@
-gcc servilo.c -lpthread -lmxml -o servilo
+gcc servilo.c -lpthread -lmxml -o servilo -Og -ggdb 
