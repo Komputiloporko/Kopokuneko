@@ -344,11 +344,11 @@ int sendParsedXML(int sock, char *indiko){
     
     while (1){
       if (run>1){
-	puts("And here is where it will crash on the second run...");
+	//puts("And here is where it will crash on the second run...");
       }
       fgetc(file);
       if (run>1){
-	puts("...or maybe not. I may have fixed it!");
+	//puts("...or maybe not. I may have fixed it!");
       }
       if (feof(file)){
 	break;
