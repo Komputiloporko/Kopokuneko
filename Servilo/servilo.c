@@ -281,11 +281,11 @@ int sendFile(int sock,char *type,char *fileName){
   return(0);
 }
 
-int sendParsedXML(int sock, char *identifier){
+int sendParsedXML(int sock, char *indiko){
   puts("sendParsedXML was called!");
 
   int j=0;
-  char *i=identifier;
+  char *i=indiko;
   char *ip;
   char *loc;
   long index;
@@ -301,13 +301,14 @@ int sendParsedXML(int sock, char *identifier){
   *directory = (char)'\0';
   strcat(directory,"kopokuneko\0");
 
-
+  int run = 0;
   
   while (*i!='\0'&&*i!=' '){
+    run++;
     j=0;
     ip=i;
     fileLength=0;
-    printf("Identifier: %s\n",identifier);
+    printf("Indiko: %s\n",indiko);
     puts("Okay...");
     do {
       j++; //The length is longer
@@ -316,30 +317,39 @@ int sendParsedXML(int sock, char *identifier){
     i=ip;
 
     //printf("j: %d\n",j);
-    char *desieroNomo=malloc(j+1);
-    *desieroNomo='\0';
+    char *dosieroNomo=malloc(j+1);
+    *dosieroNomo='\0';
 
     i++;
-    loc=desieroNomo;
+    loc=dosieroNomo;
     do {
       *loc=*i;
       loc++;
       i++; //Go to next char
     } while (*i!='/'&&*i!='\n'&&*i!='\0');
     *loc='\0';
-    printf("desieroNomo: %s.\n",desieroNomo);
+    printf("dosieroNomo: %s.\n",dosieroNomo);
     //index = strtol(fileName,NULL,36);
     //At this point, we have the next filename. Let's start parsing it!
     printf("Filepath: %s.\n",filePath);
     FILE *file;
     if ((file = fopen(filePath,"r"))!=NULL){
-      puts("desiero trovis");
+      puts("trovis dosiero");
     } else {
-      puts("ne desiero trovis");
+      puts("ne trovis dosiero");
       return(1);
     }
+
+    printf("File: %s.\n",(char *) file);
+    
     while (1){
+      if (run>1){
+	puts("And here is where it will crash on the second run...");
+      }
       fgetc(file);
+      if (run>1){
+	puts("...or maybe not. I may have fixed it!");
+      }
       if (feof(file)){
 	break;
       }
@@ -362,7 +372,7 @@ int sendParsedXML(int sock, char *identifier){
     puts("Tio funciis");
     
     if ((tree = mxmlLoadFile(NULL,file,MXML_TEXT_CALLBACK))==NULL){
-      puts("desiero ne eksistas!");
+      puts("dosiero ne eksistas!");
       return(1);
     }
 
@@ -379,11 +389,11 @@ int sendParsedXML(int sock, char *identifier){
       
       printf("Attribute: %s\n",mxmlElementGetAttr(
 			mxmlFindElement(
-					tree,tree,"post","identifier",desieroNomo,MXML_DESCEND),
+					tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),
 			"loc"));
       puts("That worked");
       //return(0);
-      int len = (int) strlen((char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",desieroNomo,MXML_DESCEND),"loc"));
+      int len = (int) strlen((char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),"loc"));
       puts("That worked");
 
       printf("Strlen: %d\n",len);
@@ -392,7 +402,7 @@ int sendParsedXML(int sock, char *identifier){
       rFN=malloc(len+1);
       puts("Malloc worked");
       
-      rFN=(char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",desieroNomo,MXML_DESCEND),"loc");
+      rFN=(char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),"loc");
       printf("length of rFN: %d\n",(int)strlen(rFN));
       puts("Created rFN\n");
       char *tmp = (char*) realloc(directory, (strlen(directory)+strlen(rFN)));
@@ -414,7 +424,7 @@ int sendParsedXML(int sock, char *identifier){
     
     //printf("Index: %ld\n",index);
 
-    free(desieroNomo);
+    free(dosieroNomo);
     mxmlDelete(tree);
     tree=NULL;
     puts("Tree deleted");
