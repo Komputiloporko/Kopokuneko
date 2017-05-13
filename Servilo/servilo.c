@@ -42,7 +42,7 @@ int main(){
 
   while ( (connectionSocketDesc = accept(socketdesc, (struct sockaddr *)&client, (socklen_t*)&c))){
     pthread_t sniffer_thread;
-    conSock = malloc(1);
+    conSock = malloc(4);
     *conSock = connectionSocketDesc;
 
     if (pthread_create( &sniffer_thread, NULL, connectionHandler, (void*) conSock)<0){
@@ -110,7 +110,7 @@ void *connectionHandler(void *socket_desc){
     //printf("Request Length: %d\n",requestLength);
     //printf("Client message: %s\n",client_message);
     free(requestHeader);
-    char *requestHeader = malloc(requestLength+1);
+    char *requestHeader = malloc(requestLength+2);
     
     for (j=0; j<requestLength;j++){
       i=client_message+j;
@@ -129,7 +129,7 @@ void *connectionHandler(void *socket_desc){
       
       free(address);
       //printf("%d",addressLength);
-      char *address = malloc(addressLength+1);
+      char *address = malloc(addressLength+8);
 
       for (j=0;j<=addressLength;j++){
 	i=client_message+requestLength+1+j;
@@ -165,6 +165,7 @@ void *connectionHandler(void *socket_desc){
       write(sock , message , strlen(message)+1);
       close(sock);
     }
+    free(requestHeader);
   }
 	
   if(read_size == 0){
@@ -294,10 +295,11 @@ int sendParsedXML(int sock, char *indiko){
   char *rFN;
   int fileLength=0;
   mxml_node_t *tree = NULL;
-  char *filePath = malloc(strlen("kopokuneko/index.xml")+1);
-  strcat(filePath,"kopokuneko/index.xml");
+  char *filePath = malloc(strlen("kopokuneko/index.xml")+8);
+  *filePath = (char)'\0';
+  strcat(filePath,(char *)"kopokuneko/index.xml");
 
-  char *directory = malloc(strlen("kopokuneko")+1);
+  char *directory = malloc(strlen("kopokuneko")+8);
   *directory = (char)'\0';
   strcat(directory,"kopokuneko\0");
 
@@ -333,14 +335,15 @@ int sendParsedXML(int sock, char *indiko){
     //At this point, we have the next filename. Let's start parsing it!
     printf("Filepath: %s.\n",filePath);
     FILE *file;
-    if ((file = fopen(filePath,"r"))!=NULL){
+    file = fopen(filePath,"r");
+    if (file!=NULL){
       puts("trovis dosiero");
     } else {
       puts("ne trovis dosiero");
       return(1);
     }
 
-    printf("File: %s.\n",(char *) file);
+    //printf("File: %s.\n",(char *) file);
     
     while (1){
       if (run>1){
@@ -357,7 +360,7 @@ int sendParsedXML(int sock, char *indiko){
     }
     puts("FileLength calculated");
     fseek(file,0,SEEK_SET);
-    char *fileContents = malloc(fileLength);
+    char *fileContents = malloc(fileLength+1);
     *fileContents = (char)'\0';
     int j;
     for (j=0;j<=fileLength;j++){
@@ -377,8 +380,14 @@ int sendParsedXML(int sock, char *indiko){
     }
 
     puts("tree funciis");
-    
-    printf("The path returned is %s.\n",(char *) mxmlFindElement(tree,tree,"data",NULL,NULL,MXML_DESCEND));
+
+
+    printf("DosieroNomo: %s.\n",dosieroNomo);
+    if (mxmlFindElement(tree,tree,"post","identifier",(char *) dosieroNomo,MXML_NO_DESCEND)==NULL){
+      puts("Couldn't find kopokunekejujo");
+      return(1);
+    }
+    printf("The path returned is: %s.\n",(char *) mxmlSaveAllocString(mxmlFindElement(tree,tree,"post","identifier",(char *) dosieroNomo,MXML_NO_DESCEND),MXML_NO_CALLBACK));
     printf("Tree: %s\n---\n",mxmlSaveAllocString(tree,MXML_NO_CALLBACK));
     type = (char *) mxmlElementGetAttr(mxmlFindElement(tree,tree,"data",NULL,NULL,MXML_DESCEND),"type");
     printf("Type: %s.\n",type);
@@ -386,6 +395,8 @@ int sendParsedXML(int sock, char *indiko){
     if(strcmp(type,"kopokunekujo")==0){
       puts("The type is \"kopokunekujo\"");
       //Find post directory
+
+      printf("dosieroNomo: %s.\n",dosieroNomo);
       
       printf("Attribute: %s\n",mxmlElementGetAttr(
 			mxmlFindElement(
@@ -405,14 +416,14 @@ int sendParsedXML(int sock, char *indiko){
       rFN=(char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),"loc");
       printf("length of rFN: %d\n",(int)strlen(rFN));
       puts("Created rFN\n");
-      char *tmp = (char*) realloc(directory, (strlen(directory)+strlen(rFN)));
+      char *tmp = realloc(directory, (strlen(directory)+strlen(rFN)+16));
       if (tmp==NULL){
 	puts("Fatal error!!!");
 	exit(1);
       } else {
 	puts("Success");
 	directory=tmp;
-	free(tmp);
+	//free(tmp);
       }
       printf("RFN: %s.\n",rFN);
       puts("Reallocated directory\n");
@@ -431,6 +442,7 @@ int sendParsedXML(int sock, char *indiko){
     //printf("Tree: %s.\n",tree);
     fseek(file,0,SEEK_SET);
     fclose(file);
+    free(fileContents);
     file=NULL;
   }
 

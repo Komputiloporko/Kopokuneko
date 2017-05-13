@@ -6,7 +6,7 @@
   <name>TestSub</name>
   <type>subreddit</type>
   <posts>
-    <post>
+    <post identifier="JavascriptClient">
       <identifier>Javascript%20Client</identifier>
       <file>Javascript Client/index.xml</file>
     </post>

@@ -9,7 +9,7 @@
       <identifier>TestSub</identifier>
       <file>TestSub/index.xml</file>
     </post>
-    <post identifier="Javascript%20Client" loc="Javascript Client/index.xml">
+    <post identifier="JavascriptClient" loc="Javascript Client/index.xml">
       <identifier>Javascript%20Client</identifier>
       <file>Javascript Client/index.xml</file>
     </post>
