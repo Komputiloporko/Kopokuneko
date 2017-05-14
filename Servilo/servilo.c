@@ -586,6 +586,47 @@ int sendParsedXML(int sock, char *indiko){
   
   if (type=="file"){
     sendFile(sock,fileType,filePath);
+  }else if (type=="kopokunekujo"){
+    //Scan the entire XML documents for posts, and put them in divs. In these divs, there shall be a link to the default post, and a link to the comments, as well as an upvote and downvote arrow.
+
+    //To do this, let's first re-open our XML file
+    FILE *file;
+    file = fopen(filePath,"r");
+    if (file!=NULL){
+      //puts("trovis dosiero");
+    } else {
+      puts("ne trovis dosiero");
+      return(1);
+    }
+    if ((tree = mxmlLoadFile(NULL,file,MXML_TEXT_CALLBACK))==NULL){
+      puts("dosiero ne eksistas!");
+      return(1);
+    }
+
+    //And now the XML file is loaded in tree!
+    //Now that this is the case, let's create the HTML
+    //(And oh no, this might be hard! MXML doesn't seem to support it!)
+    
+    char *html = "<html><head><meta charset=\"UTF-8\"><title>";
+    if (mxmlElementGetAttr(mxmlFindElement(tree,tree,"data","name",NULL,MXML_DESCEND),"type")==NULL){
+      strcat(html,"Unnamed kopokunekejujo");
+    } else {
+      strcat(html,mxmlElementGetAttr(mxmlFindElement(tree,tree,"data","name",NULL,MXML_DESCEND),"type"));
+    }
+    strcat(html,"</title><link rel=\"stylesheet\" type=\"text/css=\" href=\"/TestSub/JavascriptClient/index.css\"></head><body>");
+
+
+    //At the end, free everything
+    mxmlDelete(tree);
+    tree=NULL;
+    puts("Tree deleted");
+    //printf("Tree: %s.\n",tree);
+    fseek(file,0,SEEK_SET);
+    fclose(file);
+    file=NULL;
+    puts("Closing soc...");
+    close(sock);
+    puts("Sock closed");
   }else{
 
     puts("Closing soc...");
