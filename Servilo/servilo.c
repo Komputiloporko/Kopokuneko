@@ -304,12 +304,17 @@ int sendParsedXML(int sock, char *indiko){
   strcat(directory,"kopokuneko\0");
 
   int run = 0;
+
+  char *tmp;
+
+  char *fileType;
   
   while (*i!='\0'&&*i!=' '){
     run++;
     j=0;
     ip=i;
     fileLength=0;
+    puts("\n\n\nPROCESSING THE NEXT DIRECTORY\n");
     printf("Indiko: %s\n",indiko);
     puts("Okay...");
     do {
@@ -337,7 +342,7 @@ int sendParsedXML(int sock, char *indiko){
     FILE *file;
     file = fopen(filePath,"r");
     if (file!=NULL){
-      puts("trovis dosiero");
+      //puts("trovis dosiero");
     } else {
       puts("ne trovis dosiero");
       return(1);
@@ -346,19 +351,12 @@ int sendParsedXML(int sock, char *indiko){
     //printf("File: %s.\n",(char *) file);
     
     while (1){
-      if (run>1){
-	//puts("And here is where it will crash on the second run...");
-      }
       fgetc(file);
-      if (run>1){
-	//puts("...or maybe not. I may have fixed it!");
-      }
       if (feof(file)){
 	break;
       }
       fileLength++;
     }
-    puts("FileLength calculated");
     fseek(file,0,SEEK_SET);
     char *fileContents = malloc(fileLength+1);
     *fileContents = (char)'\0';
@@ -368,69 +366,204 @@ int sendParsedXML(int sock, char *indiko){
       *loc = fgetc(file);
     }
     *(fileContents+j-1) = (char)'\0';
-    printf("File contents:\n%s\n",fileContents);
+    
+    //UNCOMMENT for file contents to be printed
+    //printf("File contents:\n%s\n",fileContents);
   
     fseek(file,0,SEEK_SET);
-    //mxmlLoadFile(NULL,desiero,MXML_TEXT_CALLBACK);
-    puts("Tio funciis");
     
     if ((tree = mxmlLoadFile(NULL,file,MXML_TEXT_CALLBACK))==NULL){
       puts("dosiero ne eksistas!");
       return(1);
     }
 
-    puts("tree funciis");
-
 
     printf("DosieroNomo: %s.\n",dosieroNomo);
-    if (mxmlFindElement(tree,tree,"post","identifier",(char *) dosieroNomo,MXML_NO_DESCEND)==NULL){
-      puts("Couldn't find kopokunekejujo");
-      return(1);
-    }
-    printf("The path returned is: %s.\n",(char *) mxmlSaveAllocString(mxmlFindElement(tree,tree,"post","identifier",(char *) dosieroNomo,MXML_NO_DESCEND),MXML_NO_CALLBACK));
+    
+
+    
     printf("Tree: %s\n---\n",mxmlSaveAllocString(tree,MXML_NO_CALLBACK));
+    //puts("Tree put");
+    //printf("Element: %s.\n",(char *)mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_NO_DESCEND));
+    //puts("That was put!\n");
+    //printf("The path returned is: %s.\n",(char *) mxmlSaveAllocString(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_NO_DESCEND),MXML_NO_CALLBACK));
+    //puts("Now that was put.\n");
+    
     type = (char *) mxmlElementGetAttr(mxmlFindElement(tree,tree,"data",NULL,NULL,MXML_DESCEND),"type");
+    //puts("Type was assigned correctly");
     printf("Type: %s.\n",type);
+    puts("test");
+
+
+    //Now we know the type of XML file we are viewing, and have opened it
+    
 
     if(strcmp(type,"kopokunekujo")==0){
       puts("The type is \"kopokunekujo\"");
-      //Find post directory
 
+      if (mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND)==NULL||(char *)mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND)==(char *)"\0"){
+	puts("Couldn't find kopokunekejujo");
+	free(dosieroNomo);
+	mxmlDelete(tree);
+	tree=NULL;
+	puts("Tree deleted");
+	//printf("Tree: %s.\n",tree);
+	fseek(file,0,SEEK_SET);
+	fclose(file);
+	free(fileContents);
+	file=NULL;
+	close(sock);
+	return(1);
+      }
+      
+      //Debugging info
       printf("dosieroNomo: %s.\n",dosieroNomo);
       
       printf("Attribute: %s\n",mxmlElementGetAttr(
 			mxmlFindElement(
 					tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),
 			"loc"));
-      puts("That worked");
-      //return(0);
-      int len = (int) strlen((char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),"loc"));
-      puts("That worked");
 
-      printf("Strlen: %d\n",len);
-      puts("That worked");
+
+      
+      int len = (int) strlen((char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),"loc"));
       
       rFN=malloc(len+1);
-      puts("Malloc worked");
-      
-      rFN=(char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),"loc");
+      if ((mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),"directory")==NULL)||(mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),"file")==NULL)){
+	free(dosieroNomo);
+	mxmlDelete(tree);
+	tree=NULL;
+	puts("Tree deleted");
+	//printf("Tree: %s.\n",tree);
+	fseek(file,0,SEEK_SET);
+	fclose(file);
+	free(fileContents);
+	file=NULL;
+	puts("Error 404");
+	close(sock);
+	return(1);
+      }
+      rFN=(char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),"directory");
+      char *fIN=malloc(strlen((char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),"file")));
+      fIN=(char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),"file");
       printf("length of rFN: %d\n",(int)strlen(rFN));
       puts("Created rFN\n");
-      char *tmp = realloc(directory, (strlen(directory)+strlen(rFN)+16));
+      tmp = realloc(directory, (strlen(directory)+strlen("/")+strlen(rFN)+16));
       if (tmp==NULL){
 	puts("Fatal error!!!");
 	exit(1);
       } else {
-	puts("Success");
+	//puts("Success");
 	directory=tmp;
-	//free(tmp);
       }
+      
       printf("RFN: %s.\n",rFN);
-      puts("Reallocated directory\n");
+      
+      strcat(directory,"/");
       strcat(directory,rFN);
-      free(rFN);
-      puts("Added rFN to directory\n");
+      
+      //puts("Added rFN to directory\n");
+      
       printf("directory: %s.\n",directory);
+
+
+
+      //OKAY!!! Now that that job's finished, let's add the directory to the fileName!
+      tmp = realloc(filePath, (strlen(directory)+strlen("/")+strlen(fIN)+16));
+      if (tmp==NULL){
+	puts("Fatal error!!!");
+	exit(1);
+      } else {
+	//puts("Success");
+	filePath=tmp;
+      }
+      *filePath = (char)'\0';
+      strcat(filePath,directory);
+      strcat(filePath,"/");
+      strcat(filePath,fIN);
+      strcat(filePath,"\0");
+      free(fIN);
+      free(rFN);
+
+      
+    } else if (strcmp(type,"meta")==0){
+
+      
+      puts("The type is \"meta\". Changing it to \"file\"\n");
+      type="file";
+
+      if (mxmlFindElement(tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND)==NULL||(char *)mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND)==(char *)"\0"){
+	puts("Couldn't find kopokunekejujo");
+	free(dosieroNomo);
+	mxmlDelete(tree);
+	tree=NULL;
+	puts("Tree deleted");
+	//printf("Tree: %s.\n",tree);
+	fseek(file,0,SEEK_SET);
+	fclose(file);
+	free(fileContents);
+	file=NULL;
+	close(sock);
+	return(1);
+      }
+      
+      //Debugging info
+      printf("dosieroNomo: %s.\n",dosieroNomo);
+      
+      printf("Attribute: %s\n",mxmlElementGetAttr(
+			mxmlFindElement(
+					tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),
+			"loc"));
+
+      
+      int len = (int) strlen((char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),"directory"));
+      
+      if (mxmlElementGetAttr(mxmlFindElement(tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),"file")==NULL){
+	free(dosieroNomo);
+	mxmlDelete(tree);
+	tree=NULL;
+	puts("Tree deleted");
+	//printf("Tree: %s.\n",tree);
+	fseek(file,0,SEEK_SET);
+	fclose(file);
+	free(fileContents);
+	file=NULL;
+	puts("Error 404");
+	close(sock);
+	return(1);
+      }
+      char *fIN=malloc(strlen((char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),"file")));
+      fIN=(char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),"file");
+            
+      strcat(directory,"/");
+      //strcat(directory,rFN);
+
+      //puts("Added rFN to directory\n");
+      
+      printf("directory: %s.\n",directory);
+
+
+
+      //OKAY!!! Now that that job's finished, let's add the directory to the fileName!
+      tmp = realloc(filePath, (strlen(directory)+strlen("/")+strlen(fIN)+16));
+      if (tmp==NULL){
+	puts("Fatal error!!!");
+	exit(1);
+      } else {
+	//puts("Success");
+	filePath=tmp;
+      }
+      *filePath = (char)'\0';
+      strcat(filePath,directory);
+      strcat(filePath,"/");
+      strcat(filePath,fIN);
+      strcat(filePath,"\0");
+      free(fIN);
+      if (mxmlElementGetAttr(mxmlFindElement(tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),"type")==NULL){
+        fileType="text";
+      } else {
+	fileType=(char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),"type");
+      }
     }
     
     //printf("Index: %ld\n",index);
@@ -451,12 +584,15 @@ int sendParsedXML(int sock, char *indiko){
   //Okay, now we should have the info of the file or subreddit.
   //load XML
   
-  
+  if (type=="file"){
+    sendFile(sock,fileType,filePath);
+  }else{
 
-  puts("Closing file and soc...");
-  puts("File closed");
-  close(sock);
-  puts("Sock closed");
+    puts("Closing soc...");
+    close(sock);
+    puts("Sock closed");
+    //free(filePath);
+  }
   return 0;
   puts("WTF, why is this running?!?!");
 }

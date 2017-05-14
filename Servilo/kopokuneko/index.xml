@@ -5,7 +5,7 @@
   </description>
   <type>subreddit</type>
   <posts>
-    <post identifier="TestSub" loc="TestSub/index.xml">
+    <post identifier="TestSub" loc="TestSub/index.xml" directory="TestSub" file="index.xml">
       <identifier>TestSub</identifier>
       <file>TestSub/index.xml</file>
     </post>

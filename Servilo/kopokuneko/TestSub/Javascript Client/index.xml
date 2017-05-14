@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<data type="subreddit">
+<data type="meta">
   <name>Javascript Client</name>
   <description>Javascript Client</description>
   <type>Meta</type>
-  <file name="index.html" loc="index.html" type="text/html">
+  <file identifier="index.html" loc="index.html" type="text/html" file="index.html">
     <type>text/html</type>
     <location>index.html</location>
   </file>
-  <file name="index.js" loc="index.js" type="text/javascript">
+  <file identifier="index.js" loc="index.js" type="text/javascript" file="index.js">
     <type>text/javascript</type>
     <location>index.js</location>
   </file>
-  <file name="index.css" loc="index.css" type="text/css">
+  <file identifier="index.css" loc="index.css" type="text/css" file="index.css">
     <type>text/css</type>
     <location>index.css</location>
   </file>
