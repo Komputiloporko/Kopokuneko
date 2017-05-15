@@ -727,5 +727,5 @@ int sendParsedXML(int sock, char *indiko){
     //free(filePath);
   }
   return 0;
-  puts("WTF, why is this running?!?!");
+  puts("Why is this running?!?!");
 }
