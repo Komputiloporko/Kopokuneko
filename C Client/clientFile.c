@@ -21,7 +21,7 @@ int main(){
   }
   puts("Connected");
   puts("Sending Data, YOLO!");
-  message = "GET /TestSub HTTP/1.1\r\n\r\n";
+  message = "GET /TestSub/JavascriptClient/index.html HTTP/1.1\r\n\r\n";
   if (send(socketdesc,message,strlen(message),0)<0){
     puts("Oh no! Something went wrong sending the data D:. Quiting!");
     return 1;

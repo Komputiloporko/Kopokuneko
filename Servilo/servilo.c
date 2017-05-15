@@ -100,7 +100,7 @@ void *connectionHandler(void *socket_desc){
   while( (read_size = recv(sock , client_message , 2000 , 0)) > 0){
     //puts(client_message);
     //for (i=client_message;i<client_message+strlen(client_message);i++){
-      //printf("%c",*i);
+    //printf("%c",*i);
     //}
 
     int requestLength=0;
@@ -202,14 +202,14 @@ void itoa(int n, char s[])
 /* reverse:  reverse string s in place */
 void reverse(char s[])
 {
-    int i, j;
-    char c;
+  int i, j;
+  char c;
 
-    for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
-        c = s[i];
-        s[i] = s[j];
-        s[j] = c;
-    }
+  for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
+    c = s[i];
+    s[i] = s[j];
+    s[j] = c;
+  }
 }
 
 int sendFile(int sock,char *type,char *fileName){
@@ -235,7 +235,7 @@ int sendFile(int sock,char *type,char *fileName){
     fileLength++;
   }
   fseek(file,0l,0);
-  char *fileContents = malloc(fileLength);
+  char *fileContents = malloc(fileLength+8);
   *fileContents = (char)'\0';
   int j;
   for (j=0;j<=fileLength;j++){
@@ -249,10 +249,10 @@ int sendFile(int sock,char *type,char *fileName){
   do {
     j++;
   } while ((intContentLength/=10)>0);
-  char *contentLength = malloc(j);
+  char *contentLength = malloc(j+8);
   intContentLength=strlen(fileContents);
   itoa(intContentLength,contentLength);
-  char *message = malloc(strlen(generic_header)+fileLength+strlen(contentLength)+strlen("Content-Length: \n\n\n"));
+  char *message = malloc(strlen(generic_header)+fileLength+strlen(contentLength)+strlen("Content-Length: \n\n\n")+2);
   *message = (char)'\0';
   //printf("message length: %d\n. message: %s\n",(int)strlen(message),message);
   //printf("Generic Header: %s\n",generic_header);
@@ -267,6 +267,7 @@ int sendFile(int sock,char *type,char *fileName){
   //puts("Content Length added to message");
   //printf("Message is currently:\n%s",message);
   strcat(message,fileContents);
+  strcat(message,"\0");
   //puts("Freeing fileContents");
   free(fileContents);
   //puts("File contents added to message");
@@ -308,6 +309,8 @@ int sendParsedXML(int sock, char *indiko){
   char *tmp;
 
   char *fileType;
+
+  char *message = "HTTP/1.0 200 OK\nContent-Type: text/html\n\n";
   
   while (*i!='\0'&&*i!=' '){
     run++;
@@ -420,9 +423,9 @@ int sendParsedXML(int sock, char *indiko){
       printf("dosieroNomo: %s.\n",dosieroNomo);
       
       printf("Attribute: %s\n",mxmlElementGetAttr(
-			mxmlFindElement(
-					tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),
-			"loc"));
+						  mxmlFindElement(
+								  tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND),
+						  "loc"));
 
 
       
@@ -493,7 +496,7 @@ int sendParsedXML(int sock, char *indiko){
       type="file";
 
       if (mxmlFindElement(tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND)==NULL||(char *)mxmlFindElement(tree,tree,"post","identifier",dosieroNomo,MXML_DESCEND)==(char *)"\0"){
-	puts("Couldn't find kopokunekejujo");
+	puts("Couldn't find kopokunekaĵujo");
 	free(dosieroNomo);
 	mxmlDelete(tree);
 	tree=NULL;
@@ -511,9 +514,9 @@ int sendParsedXML(int sock, char *indiko){
       printf("dosieroNomo: %s.\n",dosieroNomo);
       
       printf("Attribute: %s\n",mxmlElementGetAttr(
-			mxmlFindElement(
-					tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),
-			"loc"));
+						  mxmlFindElement(
+								  tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),
+						  "loc"));
 
       
       int len = (int) strlen((char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),"directory"));
@@ -560,7 +563,7 @@ int sendParsedXML(int sock, char *indiko){
       strcat(filePath,"\0");
       free(fIN);
       if (mxmlElementGetAttr(mxmlFindElement(tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),"type")==NULL){
-        fileType="text";
+	fileType="text";
       } else {
 	fileType=(char *)mxmlElementGetAttr(mxmlFindElement(tree,tree,"file","identifier",dosieroNomo,MXML_DESCEND),"type");
       }
@@ -584,9 +587,10 @@ int sendParsedXML(int sock, char *indiko){
   //Okay, now we should have the info of the file or subreddit.
   //load XML
   
-  if (type=="file"){
+  if (strcmp(type,"file")==0){
     sendFile(sock,fileType,filePath);
-  }else if (type=="kopokunekujo"){
+  } else if (strcmp(type,"kopokunekujo")==0){
+    puts("Okay, now we'll parse an entire kopokunekujo");
     //Scan the entire XML documents for posts, and put them in divs. In these divs, there shall be a link to the default post, and a link to the comments, as well as an upvote and downvote arrow.
 
     //To do this, let's first re-open our XML file
@@ -603,20 +607,92 @@ int sendParsedXML(int sock, char *indiko){
       return(1);
     }
 
+    //Now let's find the posts
+    mxml_node_t *top = mxmlFindElement(tree,tree,"data",NULL,NULL,MXML_DESCEND_FIRST);
+    printf("top: %s\n",mxmlSaveAllocString(top,MXML_NO_CALLBACK));
+    mxml_node_t *posts = mxmlFindElement(tree,tree,"posts",NULL,NULL,MXML_DESCEND);
+    if (posts==NULL){
+      puts("Couldn't find posts");
+    };
+    printf("Posts: %s.\n",posts);
+    puts("Nothing");
+    //And make a node for the current node
+    mxml_node_t *currentNode = mxmlWalkNext(posts,tree,MXML_DESCEND_FIRST);
+
+    char buffer[8192];
+    //char *string = (char *)mxmlSaveAllocString(posts,MXML_TEXT_CALLBACK);
+    //printf("Posts: %s\n",string);
+
     //And now the XML file is loaded in tree!
     //Now that this is the case, let's create the HTML
     //(And oh no, this might be hard! MXML doesn't seem to support it!)
-    
-    char *html = "<html><head><meta charset=\"UTF-8\"><title>";
+
+    char *html = malloc(sizeof(char)*9000);//DEFINITELLY CHANGE THIS LATER!!! BIG RISK!!!
+    *html=(char)'\0';
+    //AND I MEAN CHANGE IT!!!!
+    //REALLY!!!!
+    strcat(html,"<html><head><meta charset=\"UTF-8\"><title>");
+    //char *html = "<html><head><meta charset=\"UTF-8\"><title>";
     if (mxmlElementGetAttr(mxmlFindElement(tree,tree,"data","name",NULL,MXML_DESCEND),"type")==NULL){
-      strcat(html,"Unnamed kopokunekejujo");
+      strcat(html,"Unnamed kopokunekaĵujo");
     } else {
       strcat(html,mxmlElementGetAttr(mxmlFindElement(tree,tree,"data","name",NULL,MXML_DESCEND),"type"));
     }
     strcat(html,"</title><link rel=\"stylesheet\" type=\"text/css=\" href=\"/TestSub/JavascriptClient/index.css\"></head><body>");
 
+    while (currentNode != NULL){
+      strcat(html,"<div");
+      strcat(html,"<a href=\"");
+      if ((mxmlElementGetAttr(currentNode,"identifier")==NULL)||(mxmlElementGetAttr(currentNode,"directory")==NULL)||(mxmlElementGetAttr(currentNode,"file")==NULL)){
+	//Error 404
+	//INSERT CODE HERE
+	puts("Error 404!");
+	return(1);
+      } else {
+	strcat(html,mxmlElementGetAttr(currentNode,"identifier"));
+      }
+
+      strcat(html,"\">");
+      
+      //Okay, now we need to open the file this points to, and get the name of it
+
+      //First, let's get the path
+      char *path;
+      strcat(path,directory);
+      strcat(path,"/");
+      strcat(path,mxmlElementGetAttr(currentNode,"directory"));
+      strcat(path,"/");
+      strcat(path,mxmlElementGetAttr(currentNode,"file"));
+      FILE *NAMEFILE = fopen(path,"r");
+      mxml_node_t *newtree;
+      if ((newtree = mxmlLoadFile(NULL,NAMEFILE,MXML_TEXT_CALLBACK))==NULL){
+	puts("Fatel error!");
+	return(1);
+      }
+      if(mxmlFindElement(newtree,newtree,"data","name",NULL,MXML_DESCEND)==NULL){
+	puts("Fatel error!");
+	return(1);
+      }
+      strcat(html,mxmlElementGetAttr(mxmlFindElement(newtree,newtree,"data","name",NULL,MXML_DESCEND),"name"));
+      strcat(html,"</a>");
+      
+      mxmlDelete(newtree);
+      fclose(NAMEFILE);
+      strcat(html,"</div>");
+      currentNode=mxmlWalkNext(currentNode, tree, MXML_NO_DESCEND);
+    }
+    
+    //Now add the ending stuff
+    strcat(html,"</body></html>");
+    //and add it to the message
+    strcat(message,html);
+    //And send everything
+    
+    write(sock , message , strlen(message)); 
 
     //At the end, free everything
+    free(posts);
+    free(currentNode);
     mxmlDelete(tree);
     tree=NULL;
     puts("Tree deleted");
@@ -624,6 +700,22 @@ int sendParsedXML(int sock, char *indiko){
     fseek(file,0,SEEK_SET);
     fclose(file);
     file=NULL;
+    puts("Closing soc...");
+    close(sock);
+    puts("Sock closed");
+  } else if (strcmp(type,"meta")==0){
+    //Do nothing
+
+    //At the end, free everything
+    //free(posts);
+    //free(currentNode);
+    mxmlDelete(tree);
+    tree=NULL;
+    puts("Tree deleted");
+    //printf("Tree: %s.\n",tree);
+    //fseek(file,0,SEEK_SET);
+    //fclose(file);
+    //file=NULL;
     puts("Closing soc...");
     close(sock);
     puts("Sock closed");
