@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <mxml.h>
 #include <string.h>
-#define MSGSZ 2000
+#define MSGSZ 20000
 
 void *connectionHandler(void *);
 void reverse(char s[]);
@@ -590,6 +590,7 @@ int sendParsedXML(int sock, char *indiko){
   if (strcmp(type,"file")==0){
     sendFile(sock,fileType,filePath);
   } else if (strcmp(type,"kopokunekujo")==0){
+    return(1);
     puts("Okay, now we'll parse an entire kopokunekujo");
     //Scan the entire XML documents for posts, and put them in divs. In these divs, there shall be a link to the default post, and a link to the comments, as well as an upvote and downvote arrow.
 
@@ -704,6 +705,7 @@ int sendParsedXML(int sock, char *indiko){
     close(sock);
     puts("Sock closed");
   } else if (strcmp(type,"meta")==0){
+    return(1);
     //Do nothing
 
     //At the end, free everything

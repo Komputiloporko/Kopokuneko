@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data type="meta" name="Lone Square">
+  <name>Lone Square</name>
+  <description>Lone Square</description>
+  <type>Meta</type>
+  <file identifier="index.html" loc="index.html" type="text/html" file="index.html">
+    <type>text/html</type>
+    <location>index.html</location>
+  </file>
+  <file identifier="index.js" loc="index.js" type="text/javascript" file="index.js">
+    <type>text/javascript</type>
+    <location>index.js</location>
+  </file>
+  <file identifier="index.css" loc="index.css" type="text/css" file="index.css">
+    <type>text/css</type>
+    <location>index.css</location>
+  </file>
+</data>

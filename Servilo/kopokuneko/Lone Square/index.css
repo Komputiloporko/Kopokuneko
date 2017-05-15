@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+
+body {
+  background: #DDD;
+  font-family: Noto Sans;
+  color:#000;
+}
+
+svg {
+  background: #BBB;
+  display: block;
+  margin: auto;
+}
+
+h1,h2,h3,h4,h5,h6,p{
+  text-align:center;
+}
+
+h1,h2,h3,h4,h5,h6{
+  margin:0.25em 10%;
+}

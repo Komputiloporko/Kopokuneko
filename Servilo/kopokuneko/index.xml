@@ -9,9 +9,9 @@
       <identifier>TestSub</identifier>
       <file>TestSub/index.xml</file>
     </post>
-    <post identifier="JavascriptClient" loc="Javascript Client/index.xml">
-      <identifier>Javascript%20Client</identifier>
-      <file>Javascript Client/index.xml</file>
+    <post identifier="Lone%20Square" loc="Lone Square/index.xml" directory="Lone Square" file="index.xml">
+      <identifier>Lone%20Square</identifier>
+      <file>Lone Square/index.xml</file>
     </post>
   </posts>
 </data>

@@ -11,12 +11,13 @@ request.addEventListener("load", listener);
 request.open("GET", "http://127.0.0.1:8888/index.xml");
 request.send();
 
-var requestTypeInput = document.createElement('form');
+//var requestTypeInput = document.createElement('form');
 
 
 console.log("The code runs here!")
-function submit(){
+function sendi(){
     request.addEventListener("load", listener);
-    request.open(document.getElementById("method").value,document.getElementById("submit").value);
+    console.log("Value: "+document.getElementById("reteja adreso").value);
+    request.open(document.getElementById("metodo").value,document.getElementById("reteja adreso").value);
     request.send();
 }
