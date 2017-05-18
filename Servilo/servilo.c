@@ -310,7 +310,9 @@ int sendParsedXML(int sock, char *indiko){
 
   char *fileType;
 
-  char *message = "HTTP/1.0 200 OK\nContent-Type: text/html\n\n";
+  char *message = malloc(sizeof(char)*9001);
+  *message = (char) '\0';
+  strcat(message,"HTTP/1.0 200 OK\nContent-Type: text/html\n\n");
   
   while (*i!='\0'&&*i!=' '){
     run++;
@@ -590,7 +592,8 @@ int sendParsedXML(int sock, char *indiko){
   if (strcmp(type,"file")==0){
     sendFile(sock,fileType,filePath);
   } else if (strcmp(type,"kopokunekujo")==0){
-    return(1);
+    //return(1);
+    puts("We're in unstable mode! Prepare for segfaults!");
     puts("Okay, now we'll parse an entire kopokunekujo");
     //Scan the entire XML documents for posts, and put them in divs. In these divs, there shall be a link to the default post, and a link to the comments, as well as an upvote and downvote arrow.
 
@@ -603,23 +606,37 @@ int sendParsedXML(int sock, char *indiko){
       puts("ne trovis dosiero");
       return(1);
     }
-    if ((tree = mxmlLoadFile(NULL,file,MXML_TEXT_CALLBACK))==NULL){
+    if ((tree = mxmlLoadFile(NULL,file,MXML_OPAQUE_CALLBACK))==NULL){
       puts("dosiero ne eksistas!");
       return(1);
     }
 
     //Now let's find the posts
-    mxml_node_t *top = mxmlFindElement(tree,tree,"data",NULL,NULL,MXML_DESCEND_FIRST);
-    printf("top: %s\n",mxmlSaveAllocString(top,MXML_NO_CALLBACK));
-    mxml_node_t *posts = mxmlFindElement(tree,tree,"posts",NULL,NULL,MXML_DESCEND);
-    if (posts==NULL){
-      puts("Couldn't find posts");
-    };
-    printf("Posts: %s.\n",posts);
-    puts("Nothing");
+    //mxml_node_t *top = mxmlFindElement(tree,tree,"data",NULL,NULL,MXML_DESCEND_FIRST);
+    //printf("top: %s\n",mxmlSaveAllocString(top,MXML_NO_CALLBACK));
+    //printf("Posts: %s.\n",posts);
+    //puts("Nothing");
     //And make a node for the current node
-    mxml_node_t *currentNode = mxmlWalkNext(posts,tree,MXML_DESCEND_FIRST);
-
+    /* mxml_node_t *currentNode = tree; */
+    /* printf("currentNode: %s\n",mxmlSaveAllocString(currentNode,MXML_NO_CALLBACK)); */
+    /* currentNode = mxmlWalkNext(currentNode, tree, MXML_DESCEND); */
+    /* //printf("currentNode: %s\n",mxmlSaveAllocString(currentNode,MXML_NO_CALLBACK)); */
+    /* currentNode = mxmlWalkNext(currentNode, tree, MXML_DESCEND); */
+    /* currentNode = mxmlWalkNext(currentNode, tree, MXML_NO_DESCEND); */
+    /* printf("currentNode: %s\n",mxmlSaveAllocString(currentNode,MXML_NO_CALLBACK)); */
+    /* currentNode = mxmlWalkNext(currentNode, tree, MXML_NO_DESCEND); */
+    /* printf("currentNode: %s\n",mxmlSaveAllocString(currentNode,MXML_NO_CALLBACK)); */
+    /* currentNode = mxmlWalkNext(currentNode, tree, MXML_NO_DESCEND); */
+    /* printf("currentNode: %s\n",mxmlSaveAllocString(currentNode,MXML_NO_CALLBACK)); */
+    /* currentNode = mxmlWalkNext(currentNode, tree, MXML_DESCEND); */
+    /* printf("currentNode: %s\n",mxmlSaveAllocString(currentNode,MXML_NO_CALLBACK)); */
+    mxml_node_t *currentNode = mxmlFindElement(tree, tree, "posts",NULL,NULL,MXML_DESCEND_FIRST);
+    //if ((struct mxml_node_t *)currentNode==(struct mxml_node_t *)NULL){
+    //puts("Eraro 404");
+    //return (1);
+    //}
+    printf("CurrentNode: %s\n",(char *)mxmlSaveAllocString(currentNode,MXML_NO_CALLBACK));
+    
     char buffer[8192];
     //char *string = (char *)mxmlSaveAllocString(posts,MXML_TEXT_CALLBACK);
     //printf("Posts: %s\n",string);
@@ -658,7 +675,8 @@ int sendParsedXML(int sock, char *indiko){
       //Okay, now we need to open the file this points to, and get the name of it
 
       //First, let's get the path
-      char *path;
+      char *path = malloc(9000);
+      *path = (char)'\0';
       strcat(path,directory);
       strcat(path,"/");
       strcat(path,mxmlElementGetAttr(currentNode,"directory"));
@@ -692,7 +710,6 @@ int sendParsedXML(int sock, char *indiko){
     write(sock , message , strlen(message)); 
 
     //At the end, free everything
-    free(posts);
     free(currentNode);
     mxmlDelete(tree);
     tree=NULL;
