@@ -612,6 +612,7 @@ int sendParsedXML(int sock, char *indiko){
     }
 
     //Now let's find the posts
+    //HERE is where the errors are. I've commented out a lot...
     //mxml_node_t *top = mxmlFindElement(tree,tree,"data",NULL,NULL,MXML_DESCEND_FIRST);
     //printf("top: %s\n",mxmlSaveAllocString(top,MXML_NO_CALLBACK));
     //printf("Posts: %s.\n",posts);
@@ -636,6 +637,7 @@ int sendParsedXML(int sock, char *indiko){
     //return (1);
     //}
     printf("CurrentNode: %s\n",(char *)mxmlSaveAllocString(currentNode,MXML_NO_CALLBACK));
+    puts("Just putting something here so the text updates");
     
     char buffer[8192];
     //char *string = (char *)mxmlSaveAllocString(posts,MXML_TEXT_CALLBACK);
